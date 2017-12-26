@@ -1,3 +1,3 @@
 FROM scratch
 ADD main /
-ENTRYPOINT [ "main" ]
+ENTRYPOINT [ "/main" ]
