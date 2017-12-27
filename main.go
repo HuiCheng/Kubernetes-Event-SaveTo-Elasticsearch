@@ -88,7 +88,7 @@ func main() {
 			}
 
 			body := strings.NewReader(string(j))
-			req, err := http.NewRequest("POST", url, body)
+			req, err := http.NewRequest("PUT", url, body)
 			if err != nil {
 				glog.Error(err.Error())
 				continue
