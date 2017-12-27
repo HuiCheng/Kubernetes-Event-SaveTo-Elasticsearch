@@ -3,12 +3,9 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
 
 	"github.com/golang/glog"
+	elastic "gopkg.in/olivere/elastic.v3"
 
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
@@ -71,37 +68,32 @@ func main() {
 	glog.Info("Kubernetes Conn Get Events")
 	eventWatch, err := kc.GetEvents()
 	if err != nil {
-		glog.Error(err.Error())
+		glog.Fatal(err.Error())
 	}
 
 	glog.Info("Kubernetes Conn Get Events Chan")
 
-	url := fmt.Sprint(*elasticsearchHost, *elasticsearchIndex, "/", *elasticsearchType, "/")
+	glog.Info("Conn Elasticsearch")
+	connes, err := elastic.NewClient(elastic.SetURL(*elasticsearchHost))
+	if err != nil {
+		glog.Fatal(err.Error())
+	}
+
 	eventWatchChan := eventWatch.ResultChan()
 	for {
 		select {
 		case event := <-eventWatchChan:
-			j, err := json.Marshal(event)
+			eventJSON, err := json.Marshal(event)
 			if err != nil {
 				glog.Error(err.Error())
 				continue
 			}
 
-			body := strings.NewReader(string(j))
-			req, err := http.NewRequest("PUT", url, body)
+			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(eventJSON).Do()
 			if err != nil {
-				glog.Error(err.Error())
-				continue
-			}
-
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				glog.Error(err.Error())
-				continue
+				glog.Fatal(err.Error())
 			} else {
-				s, _ := ioutil.ReadAll(resp.Body)
-				glog.Info(string(s))
-				resp.Body.Close()
+				glog.Info(eventJSON)
 			}
 		}
 	}
