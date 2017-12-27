@@ -57,6 +57,7 @@ func main() {
 	elasticsearchHost := flag.String("elasticsearchHost", "http://127.0.0.1:9200/", "Elasticsearch Host Url")
 	elasticsearchIndex := flag.String("elasticsearchIndex", "kubernetesevents", "Elasticsearch Index Name")
 	elasticsearchType := flag.String("elasticsearchType", "kubernetestable", "Elasticsearch Type Name")
+	elasticsearchRefresh := flag.Bool("elasticsearchRefresh", true, "Elasticsearch Type Name")
 
 	flag.Parse()
 
@@ -87,7 +88,7 @@ func main() {
 	for {
 		select {
 		case event := <-eventWatchChan:
-			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(event).Refresh(true).Do()
+			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(event).Refresh(*elasticsearchRefresh).Do()
 			if err != nil {
 				glog.Error(err.Error())
 				continue
