@@ -100,7 +100,7 @@ func main() {
 				continue
 			} else {
 				s, _ := ioutil.ReadAll(resp.Body)
-				glog.Info(s)
+				glog.Info(string(s))
 				resp.Body.Close()
 			}
 		}
