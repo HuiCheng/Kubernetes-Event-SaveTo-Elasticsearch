@@ -74,7 +74,7 @@ func main() {
 	glog.Info("Kubernetes Conn Get Events Chan")
 
 	glog.Info("Conn Elasticsearch")
-	connes, err := elastic.NewClient(elastic.SetURL(*elasticsearchHost))
+	connes, err := elastic.NewClient(elastic.SetURL(*elasticsearchHost), elastic.SetSniff(false))
 	if err != nil {
 		glog.Fatal(err.Error())
 	}
@@ -89,7 +89,7 @@ func main() {
 				continue
 			}
 
-			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(eventJSON).Do()
+			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(eventJSON).Refresh(true).Do()
 			if err != nil {
 				glog.Fatal(err.Error())
 			} else {
