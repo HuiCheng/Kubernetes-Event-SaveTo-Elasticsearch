@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 
 	"github.com/golang/glog"
@@ -79,21 +78,20 @@ func main() {
 		glog.Fatal(err.Error())
 	}
 
+	_, err = connes.CreateIndex(*elasticsearchIndex).Do()
+	if err != nil {
+		glog.Error(err.Error())
+	}
+
 	eventWatchChan := eventWatch.ResultChan()
 	for {
 		select {
 		case event := <-eventWatchChan:
-			eventJSON, err := json.Marshal(event)
-			if err != nil {
-				glog.Error(err.Error())
-				continue
-			}
-
-			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(eventJSON).Refresh(true).Do()
+			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(event).Refresh(true).Do()
 			if err != nil {
 				glog.Fatal(err.Error())
 			} else {
-				glog.Info(eventJSON)
+				glog.Info(event)
 			}
 		}
 	}
