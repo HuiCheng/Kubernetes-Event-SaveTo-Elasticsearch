@@ -89,7 +89,8 @@ func main() {
 		case event := <-eventWatchChan:
 			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(event).Refresh(true).Do()
 			if err != nil {
-				glog.Fatal(err.Error())
+				glog.Error(err.Error())
+				continue
 			} else {
 				glog.Info(event)
 			}
