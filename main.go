@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -98,6 +99,8 @@ func main() {
 				glog.Error(err.Error())
 				continue
 			} else {
+				s, _ := ioutil.ReadAll(resp.Body)
+				glog.Info(s)
 				resp.Body.Close()
 			}
 		}
