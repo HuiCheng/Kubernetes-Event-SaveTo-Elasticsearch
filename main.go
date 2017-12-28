@@ -87,7 +87,10 @@ func main() {
 	eventWatchChan := eventWatch.ResultChan()
 	for {
 		select {
-		case event := <-eventWatchChan:
+		case event, ok := <-eventWatchChan:
+			if !ok {
+				glog.Fatal("eventWatchChan Empty")
+			}
 			_, err = connes.Index().Index(*elasticsearchIndex).Type(*elasticsearchType).BodyJson(event).Refresh(*elasticsearchRefresh).Do()
 			if err != nil {
 				glog.Error(err.Error())
